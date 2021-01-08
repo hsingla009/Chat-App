@@ -4,13 +4,13 @@ const app = express();
 const mongoose = require("mongoose");
 const router = require("./router/index");
 const bodyParser = require("body-parser");
+const mongodbKey = require('./apiKeys').mongoKey;
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use(router);
 const port = config.appPort;
 
-const uri =
-  "mongodb+srv://hsingla009:harshit1234@cluster0.q5idx.mongodb.net/chatAPP?retryWrites=true&w=majority";
+const uri =mongodbKey;
 mongoose.connect(uri)
   .then(() => {
     app.listen(port);
