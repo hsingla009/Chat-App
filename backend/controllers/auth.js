@@ -7,6 +7,8 @@ exports.registerUser = (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
+  const gender = req.body.gender;
+  console.log(gender);
   let user;
   User.findOne({ email: email })
     .then((user) => {
@@ -19,6 +21,7 @@ exports.registerUser = (req, res, next) => {
             user = new User({
               name: name,
               email: email,
+              gender: gender,
               password: hashedPassword,
             });
             return user.save();
@@ -40,12 +43,10 @@ exports.login = (req, res, next) => {
   console.log("login user");
   const email = req.body.email;
   const password = req.body.password;
-  User.findOne({email:email})
-  .then(user=>{
-    if(!user){
+  User.findOne({ email: email }).then((user) => {
+    if (!user) {
       res.send("user not found");
-    }
-    else{
+    } else {
       return bcrypt.compare(password,user.password)
       .then(doMatch =>{
         if(!doMatch){
@@ -55,7 +56,12 @@ exports.login = (req, res, next) => {
           res.send(user);
         }
       })
+      // if (user.password.toString() === password.toString()) {
+      //   // delete user.password;
+      //   res.send(user);
+      // } else {
+      //   res.send("pass not found");
+      // }
     }
-  }
-  )
+  });
 };
