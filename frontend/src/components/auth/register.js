@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import registerImage from "./../../assets/images/register.svg";
 import "./Auth.css";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { register } from "../../store/action/auth";
-const Register = ({history}) => {
+const Register = ({ history }) => {
   const dispatch = useDispatch();
+  const errorMsg = useSelector((state) => state.authReducer.errorMessage);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("Male");
   const [password, setPassword] = useState("");
+  const isPassValid = password.length < 5;
+  const [showErr, setErr] = useState(false);
   const submitForm = (e) => {
     e.preventDefault();
     dispatch(register({ name, email, gender, password }, history));
@@ -23,6 +26,22 @@ const Register = ({history}) => {
           </div>
           <div id="form-section">
             <h2>Create an account</h2>
+            {errorMsg.length > 0 ? (
+              <span
+                style={{
+                  padding: "7px 40px 7px 40px",
+                  color: "red",
+                  marginTop: "-10px",
+                  marginBottom: "-10px",
+                  border: "1px solid red",
+                  backgroundColor: "#F4A7A7",
+                }}
+              >
+                {errorMsg}
+              </span>
+            ) : (
+              ""
+            )}
             <form onSubmit={submitForm}>
               <div className="input-field">
                 <input
@@ -37,7 +56,7 @@ const Register = ({history}) => {
               <div className="input-field">
                 <input
                   onChange={(ev) => setEmail(ev.target.value)}
-                  type="text"
+                  type="email"
                   value={email}
                   required
                   placeholder="Email"
@@ -56,16 +75,21 @@ const Register = ({history}) => {
               <div className="input-field">
                 <input
                   onChange={(ev) => setPassword(ev.target.value)}
+                  onClick={() => setErr(true)}
                   type="password"
                   value={password}
                   required
                   placeholder="Password"
                 />
+                <p style={{ marginTop: "-15px", color: "red" }}>
+                  {showErr && isPassValid ? "Your password is too short" : ""}
+                </p>
               </div>
-              <button>LOGIN</button>
+
+              <button>SIGN UP</button>
             </form>
             <p>
-              Already have account <Link to="/login">Login</Link>
+              Already have accout <Link to="/login">Login</Link>
             </p>
           </div>
         </div>

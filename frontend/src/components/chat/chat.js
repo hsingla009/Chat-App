@@ -1,10 +1,14 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-
-const Chat = ()=>{
-    const user = useSelector(state=>state.authReducer.user);
-    return (
-        <h1>chat {user.name}</h1>
-    )
-}
+import React from "react";
+import { useSelector } from "react-redux";
+import Navbar from "./components/Navbar/Navbar";
+import "./chat.css";
+const Chat = () => {
+  const user = useSelector((state) => state.authReducer.user);
+  return (
+    <div id="chat-container">
+      <Navbar />
+      <div id="chat-wrap">data</div>
+    </div>
+  );
+};
 export default Chat;

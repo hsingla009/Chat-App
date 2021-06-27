@@ -1,24 +1,30 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
-const { use } = require("../router");
+const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 exports.registerUser = (req, res, next) => {
   console.log("registerUser");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() });
+  }
   // console.log(req.body);
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
   const gender = req.body.gender;
-  console.log(gender);
+  // console.log(gender);
   let user;
   User.findOne({ email: email })
     .then((user) => {
       if (user) {
-        res.send("user exists");
+        res.status(404).json({ message: "User exists" });
       } else {
         return bcrypt
           .hash(password, 12)
           .then((hashedPassword) => {
             user = new User({
+              avatar:"http://localhost:8080/"+gender.toLowerCase()+".svg",
               name: name,
               email: email,
               gender: gender,
@@ -29,13 +35,16 @@ exports.registerUser = (req, res, next) => {
 
           .then((result) => {
             // console.log(result);
-            res.send(result);
+            const temp = { ...result };
+            delete temp._doc.password;
+            const userWithToken = generateToken(temp._doc);
+            return res.send(userWithToken);
           });
       }
     })
     .catch((err) => {
       console.log(err);
-      res.send(err);
+      return res.status(500).json({ message: err.message });
     });
 };
 
@@ -45,17 +54,18 @@ exports.login = (req, res, next) => {
   const password = req.body.password;
   User.findOne({ email: email }).then((user) => {
     if (!user) {
-      res.send("user not found");
+      res.status(404).json({ message: "User not found" });
     } else {
-      return bcrypt.compare(password,user.password)
-      .then(doMatch =>{
-        if(!doMatch){
-          res.send("incorrect password ");
+      return bcrypt.compare(password, user.password).then((doMatch) => {
+        if (!doMatch) {
+          return res.status(401).json({ message: "Password is incorrect" });
+        } else {
+          const temp = { ...user };
+          delete temp._doc.password;
+          const userWithToken = generateToken(temp._doc);
+          return res.send(userWithToken);
         }
-        else{
-          res.send(user);
-        }
-      })
+      });
       // if (user.password.toString() === password.toString()) {
       //   // delete user.password;
       //   res.send(user);
@@ -64,4 +74,9 @@ exports.login = (req, res, next) => {
       // }
     }
   });
+};
+
+const generateToken = (user) => {
+  const token = jwt.sign(user, "harshit", { expiresIn: "1h" });
+  return { ...user, ...{ token } };
 };

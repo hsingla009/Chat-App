@@ -8,7 +8,11 @@ export const login = (params, history) => (dispatch) => {
       history.push("/");
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err.response.data.message);
+      dispatch({
+        type: actionTypes.AUTH_ERROR,
+        errorMessage: err.response.data.message,
+      });
     });
 };
 
@@ -20,6 +24,15 @@ export const register = (params, history) => (dispatch) => {
       history.push("/");
     })
     .catch((err) => {
-      console.log(err);
+      // console.log(err);
+      dispatch({
+        type: actionTypes.AUTH_ERROR,
+        errorMessage: err.response.data.message,
+      });
     });
+};
+
+export const logout = () => (dispatch) => {
+  AuthService.logout();
+  dispatch({ type: actionTypes.LOGOUT });
 };
